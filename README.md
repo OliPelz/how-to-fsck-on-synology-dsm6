@@ -1,4 +1,4 @@
-# How to properly do a filesystem check on Synology DSM 6.0 e.g. DS414
+# How to properly do a filesystem check (fsck or e2fck) on Synology DSM 6.0 e.g. DS414
 
 I tried a lot of instructions and tutorials to do a file system check on a Synology DSM 6 device e.g the DS414.
 The first step involves unmounting the partition you want to check e.g. the /volumes/ path before you can file system check it.
