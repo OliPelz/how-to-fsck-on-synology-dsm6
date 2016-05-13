@@ -1,17 +1,19 @@
 # How to properly do a filesystem check (fsck or e2fck) on Synology DSM 6.0 e.g. DS414
 
 I tried a lot of instructions and tutorials to do a file system check on a Synology DSM 6 device e.g the DS414.
+
 The first step involves unmounting the partition you want to check e.g. the /volumes/ path before you can file system check it.
+
 All the instructions I found are inaccurate, too old (most are for DSM 4 or 5), do not work or a dangerous. I just could not get the unmounting to work!
 
-Presteps are install ipckg using instructions found here: https://github.com/basmussen/ds414-boostrap-dsm5
-then install the packages less, lsof, mlocate, 
+Presteps are install ```ipckg``` using instructions found here: ```https://github.com/basmussen/ds414-boostrap-dsm5```
+then install the packages ```less, lsof, mlocate```
 
 E.g. the common advice:
 ```
 syno_poweroff_task -d 
 ```
-shuts down all services including telnet and apache, etc. also shutsdown my ssh server and the webserver making the box completely inaccessible while still powered on -> you need to hard reset the box
+shuts down all services including telnet and the web interface etc. but it also shutsdown my ssh server and the webserver making the box completely inaccessible while still powered on -> you need to hard reset the box
 
 
 the other common advice to just do a 
@@ -54,13 +56,13 @@ afpd
 cnid
 
 ```
-If you are into a bit of Linux you can spot/group these services into categories:
-
+If you are a bit into  Linux you can spot/group these services into categories:
+```
 php5/httpd/apache2/nginx = searchterms httpd,nginx
 postgres = searchterms postgres
 dovecot/syno_mail = searchterm mail
 ...
-
+```
 
 to generally find services by name use the following syntax
 ```
@@ -73,7 +75,7 @@ e.g.
 find /usr/syno/etc.defaults/rc.sysv/ | grep -i postgres
 synoservicecfg --status | grep enable | grep -i nginx
 ```
-So my approach was spot a service which sounds promising, stop it and then run 
+So my approach was to spot a service which sounds promising, stop it and then run 
 ```lsof /volume1/ | sed 1d | cut -d" " -f1 | sort | uniq``` to see if this service vanishes from the list.
 So all in all I found the following services which I had to stop.
 
@@ -105,9 +107,10 @@ synoservicecfg --stop s2s_daemon
 ```
 
 ### others: afp and cnid_dbd 
-Since I could not find any service definition file for that I simply killed the processes using good old ```kill``` command, which did not restart luckily within a minute or so.
+Since I could not find any service definition file for those I simply killed the processes using good old ```kill``` command, which did not restart luckily within a minute or so.
 
-### now the last thing what was still missing were some user cwd etc. processes connected, as the /home folder was part of the /volumes1 folder:
+### disconnect the system user 
+now the last thing what was still in the list were some user ```cwd``` processes connected, as the /home folder was part of the /volumes1 folder:
 ```
 sh      8480  Oli  cwd    DIR  253,1     4096 154796037 /volume1/homes/Oli
 sudo    9104 root  cwd    DIR  253,1     4096 154796037 /volume1/homes/Oli
@@ -118,7 +121,7 @@ lsof    9210 root  cwd    DIR  253,1     4096 154796037 /volume1/homes/Oli
 lsof    9210 root  txt    REG  253,1   125544 369233175 /opt/sbin/lsof
 ```
 
-Solution here was to logout your user and login the true root user then you can umount
+Solution here was to logout your user and login the true root user using sshthen you can finally umount those beasts:
 ```
 umount /opt
 umount /volume1
