@@ -1,4 +1,4 @@
-How to properly do a filesystem check on Synology DSM 6.0 e.g. DS414
+# How to properly do a filesystem check on Synology DSM 6.0 e.g. DS414
 
 I tried a lot of instructions and tutorials to do a file system check on a Synology DSM 6 device e.g the DS414.
 The first step involves unmounting the partition you want to check e.g. the /volumes/ path before you can file system check it.
@@ -20,7 +20,7 @@ lsof /volumes/
 ```
 and then kill the PID of the processes using the volume. Problem with this is that most services are watched by the system so if you kill them, they just restart again after a sec.
 
-Here is my solution:
+## Here is my solution:
 Get the list of services associated with your volume you want to fs check:
 ```
 lsof /volumes
@@ -78,30 +78,36 @@ So my approach was spot a service which sounds promising, stop it and then run
 So all in all I found the following services which I had to stop.
 
 
-#shutdown postgres - postgesql
+### shutdown postgres - postgesql
+```
 /usr/syno/etc.defaults/rc.sysv/pgsql.sh stop
-
-#stop php5
+```
+### stop php5
+```
 synoservicecfg --stop pkgctl-PHP5.6 
-
-#shutdown Mailserver
+```
+### shutdown Mailserver
+```
 synoservicecfg --stop pkgctl-MailServer
-
-# shutdown backups  (img_backu)
+```
+### shutdown backups  (img_backu)
+```
 synoservicecfg --stop synobackupd
 synoservicecfg --stop pkgctl-HyperBackupVault
 synoservicecfg --stop pkgctl-synobackupd
 synoservicecfg --stop pkgctl-HyperBackup
 synoservicecfg --stop pkgctl-HyperBackupVault
 synoservicecfg --stop pkgctl-TimeBackup
-
-# shutdown s2sdaemon
+```
+### shutdown s2sdaemon
+```
 synoservicecfg --stop s2s_daemon
+```
 
-# others: afp and cnid_dbd 
+### others: afp and cnid_dbd 
 Since I could not find any service definition file for that I simply killed the processes using good old ```kill``` command, which did not restart luckily within a minute or so.
 
-# now the last thing what was still missing were some user cwd etc. processes connected, as the /home folder was part of the /volumes1 folder:
+### now the last thing what was still missing were some user cwd etc. processes connected, as the /home folder was part of the /volumes1 folder:
 ```
 sh      8480  Oli  cwd    DIR  253,1     4096 154796037 /volume1/homes/Oli
 sudo    9104 root  cwd    DIR  253,1     4096 154796037 /volume1/homes/Oli
@@ -118,7 +124,7 @@ umount /opt
 umount /volume1
 ```
 
-#then finally run your fsck diagnostic etc.
+### then finally run your fsck diagnostic etc.
 ```
 fsck.ext4 -fv /dev/mapper/vol1-origin
 ```
